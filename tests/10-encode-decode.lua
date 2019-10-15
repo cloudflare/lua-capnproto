@@ -776,4 +776,71 @@ function test_serialize_cdata()
     assert_equal(bin, ffi.string(arr, len))
 end
 
+function test_list_of_list_of_text()
+    local data = {
+        llt0 = {
+            {"a"},
+            {"b", "c"},
+        }
+    }
+
+    assert_equal(16 + 2 * 8 + 2 * 8 + 3 * 16, hw_capnp.T5.calc_size(data))
+    local bin   = hw_capnp.T5.serialize(data)
+    copy  = hw_capnp.T5.parse(bin, copy)
+    assert_not_nil(copy.llt0)
+    assert_equal(2, #copy.llt0)
+    assert_not_nil(copy.llt0[1])
+    assert_not_nil(copy.llt0[2])
+
+    assert_equal(1, #copy.llt0[1])
+    assert_not_nil(copy.llt0[1][1])
+    assert_equal(data.llt0[1][1], copy.llt0[1][1])
+
+    assert_equal(2, #copy.llt0[2])
+    assert_not_nil(copy.llt0[2][1])
+    assert_not_nil(copy.llt0[2][2])
+    assert_equal(data.llt0[2][1], copy.llt0[2][1])
+    assert_equal(data.llt0[2][2], copy.llt0[2][2])
+end
+
+function test_list_of_list_of_list_text()
+    local data = {
+        lllt0 = {
+            {
+              {"a"},
+            },
+            {
+              {"b"},
+              {"c", "d"},
+            },
+        }
+    }
+
+    assert_equal(16 + 2 * 8 + 2 * 8 + 3 * 8 + 4 * 16, hw_capnp.T5.calc_size(data))
+    local bin   = hw_capnp.T5.serialize(data)
+    copy  = hw_capnp.T5.parse(bin, copy)
+    assert_not_nil(copy.lllt0)
+    assert_equal(2, #copy.lllt0)
+    assert_not_nil(copy.lllt0[1])
+
+    assert_equal(1, #copy.lllt0[1])
+    assert_not_nil(copy.lllt0[1][1])
+
+    assert_equal(1, #copy.lllt0[1][1])
+    assert_not_nil(copy.lllt0[1][1][1])
+    assert_equal(data.lllt0[1][1][1], copy.lllt0[1][1][1])
+
+    assert_equal(2, #copy.lllt0[2])
+    assert_not_nil(copy.lllt0[2][1])
+
+    assert_equal(1, #copy.lllt0[2][1])
+    assert_not_nil(copy.lllt0[2][1][1])
+    assert_equal(data.lllt0[2][1][1], copy.lllt0[2][1][1])
+
+    assert_equal(2, #copy.lllt0[2][2])
+    assert_not_nil(copy.lllt0[2][2][1])
+    assert_equal(data.lllt0[2][2][1], copy.lllt0[2][2][1])
+    assert_equal(data.lllt0[2][2][2], copy.lllt0[2][2][2])
+end
+
 return _G
