@@ -736,8 +736,8 @@ function _M.comp_calc_list_size(res, field, nodes, name, level, elm_type, ...)
         return
     end
 
-    insertl(res, level, format("if data[\"%s\"] and " ..
-            "type(data[\"%s\"]) == \"table\" then\n", name, name))
+    insertl(res, level, format("if %s and " ..
+            "type(%s) == \"table\" then\n", name, name))
 
     if elm_type == "object" or elm_type == "anyPointer"
         or elm_type == "group" then
@@ -752,42 +752,42 @@ function _M.comp_calc_list_size(res, field, nodes, name, level, elm_type, ...)
         local elm_size = get_size(elm_type) / 8
         insertlt(res, level + 1, {
             "-- num * acutal size\n",
-            format("size = size + round8(#data[\"%s\"] * %d)\n",
+            format("size = size + round8(#%s * %d)\n",
                 name, elm_size)
             })
     else
         -- struct tag
         if elm_type == "struct" then
-            insertl(res, level + 1, format("size = size + 8\n", name))
+            insertl(res, level + 1, format("size = size + 8\n"))
         end
 
-        local new_name = "[\"" .. name .. "\"]" .. "[i" .. level .. "]"
+        local new_name = name .. "[i" .. level .. "]"
         -- calculate body size
-        insertl(res, level + 1, format("local num%d = #data[\"%s\"]\n",
+        insertl(res, level + 1, format("local num%d = #%s\n",
                 level, name))
         insertl(res, level + 1, format("for %s=1, num%d do\n",
                 "i" .. level, level))
 
         if elm_type == "list" then
-            insertl(res, level + 2, format("size = size + 8\n", name))
+            insertl(res, level + 2, format("size = size + 8\n"))
             _M.comp_calc_list_size(res, field, nodes, new_name, level + 2, ...)
         elseif elm_type == "text" then
-            insertl(res, level + 2, format("size = size + 8\n", name))
+            insertl(res, level + 2, format("size = size + 8\n"))
             insertlt(res, level + 2, {
                 " -- num * acutal size\n",
-                format("size = size + round8(#data%s * 1 + 1)\n", new_name)
+                format("size = size + round8(#%s * 1 + 1)\n", new_name)
             })
         elseif elm_type == "data" then
-            insertl(res, level + 2, format("size = size + 8\n", name))
+            insertl(res, level + 2, format("size = size + 8\n"))
             insertlt(res, level + 2, {
                 " -- num * acutal size\n",
-                format("size = size + round8(#data%s * 1)\n", new_name)
+                format("size = size + round8(#%s * 1)\n", new_name)
             })
         elseif elm_type == "struct" then
             local id = ...
             local struct_name = get_name(nodes[id].displayName)
             insertl(res, level + 2, format(
-                    "size = size + _M.%s.calc_size_struct(data%s)\n",
+                    "size = size + _M.%s.calc_size_struct(%s)\n",
                     struct_name, new_name))
         end
         insertl(res, level + 1, "end\n")
@@ -819,7 +819,8 @@ function comp_calc_size(res, fields, size, name, nodes, is_group)
             -- list_type[1] must be "list" and should be skipped because is
             -- is not element type
             insert(res, "        -- list\n")
-            _M.comp_calc_list_size(res, field, nodes, field.name, 2,
+            _M.comp_calc_list_size(res, field, nodes,
+                    format("data[\"%s\"]", field.name), 2,
                     select(2, unpack(list_type)))
         elseif field.type_name == "struct" or field.type_name == "group" then
             insert(res, format([[
