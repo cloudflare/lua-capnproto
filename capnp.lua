@@ -337,7 +337,7 @@ function _M.get_enum_name(v, default, enum_schema, name)
     v = bxor(v, default) -- starts from 0
     local r = enum_schema[v]
     if not r then
-        error(name, " Unknown enum val:", v, ", out of range")
+        error((name or "") .. " Unknown enum val:" .. v .. ", out of range")
     end
     return r
 end
