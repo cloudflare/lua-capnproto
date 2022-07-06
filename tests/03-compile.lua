@@ -22,7 +22,7 @@ function test_comp_calc_list_size()
           defaultValue = {list = 'opaque pointer'},
           hadExplicitDefault = false },
         ordinal = {explicit = 25} }
-    local name = field.name
+    local name = string.format("data[\"%s\"]", field.name)
     local list_type = util.get_field_type(field)
 
     compile.comp_calc_list_size(res, field, {}, name, 1, select(2, unpack(list_type)))

@@ -91,3 +91,8 @@ struct T3 {
 
 struct T4 {
 }
+
+struct T5 {
+    llt0 @0 :List(List(Text));
+    lllt0 @1 :List(List(List(Text)));
+}
